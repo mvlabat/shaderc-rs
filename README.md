@@ -112,7 +112,13 @@ must be installed and available on `PATH`:
 
 Additionally:
 - [Ninja](https://github.com/ninja-build/ninja/releases) is required on
-  windows-msvc, but optional on all other platforms.
+  windows-msvc unless `use-msbuild` feature is specified. This is because
+  MSBuild does not support paths longer than MAX_PATH
+  [before 16.0](https://github.com/Microsoft/msbuild/issues/53#issuecomment-459062618).
+  (So it is **highly recommended** to use Ninja to build for windows-msvc.
+  By specifying `use-msbuild` feature, you will very likely see compilation
+  errors due to file path length limit.) Ninja is optional on all other
+  platforms.
 
 These requirements can be either installed with your favourite package manager
 or with installers from the projects' websites. Below are some example ways

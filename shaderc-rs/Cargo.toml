@@ -21,6 +21,7 @@ assert_matches = "1.3"
 
 [features]
 build-from-source = ["shaderc-sys/build-from-source"]
+use-msbuild = ["shaderc-sys/use-msbuild"]
 
 # NOTE: The following feature is deprecated. It will be removed in the next
 # release.

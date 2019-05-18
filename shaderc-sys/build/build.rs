@@ -38,7 +38,7 @@ fn build_shaderc(shaderc_dir: &PathBuf, use_ninja: bool) -> PathBuf {
     config.build()
 }
 
-fn build_shaderc_msvc(shaderc_dir: &PathBuf) -> PathBuf {
+fn build_shaderc_msvc(shaderc_dir: &PathBuf, use_ninja: bool) -> PathBuf {
     let mut config = cmake::Config::new(shaderc_dir);
     config
         .profile("Release")
@@ -53,13 +53,16 @@ fn build_shaderc_msvc(shaderc_dir: &PathBuf) -> PathBuf {
         .define("CMAKE_CXX_FLAGS", " /nologo /EHsc")
         .define("CMAKE_C_FLAGS_RELEASE", " /nologo /EHsc")
         .define("CMAKE_CXX_FLAGS_RELEASE", " /nologo /EHsc")
-        .define("CMAKE_INSTALL_LIBDIR", "lib")
-        .generator("Ninja");
+        .define("CMAKE_INSTALL_LIBDIR", "lib");
+    if use_ninja {
+        config.generator("Ninja");
+    }
     config.build()
 }
 
 fn main() {
     let config_build_from_source = env::var("CARGO_FEATURE_BUILD_FROM_SOURCE").is_ok();
+    let config_use_msbuild = env::var("CARGO_FEATURE_USE_MSBUILD").is_ok();
     let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap();
     let target_env = env::var("CARGO_CFG_TARGET_ENV").unwrap();
     let explicit_lib_dir_set = env::var("SHADERC_LIB_DIR").is_ok();
@@ -222,8 +225,10 @@ fn main() {
     let shaderc_dir = Path::new(&manifest_dir).join("build");
 
     let mut lib_path = if target_env == "msvc" {
-        finder.must_have("ninja");
-        build_shaderc_msvc(&shaderc_dir)
+        if !config_use_msbuild {
+            finder.must_have("ninja");
+        }
+        build_shaderc_msvc(&shaderc_dir, !config_use_msbuild)
     } else {
         let has_ninja = finder.maybe_have("ninja").is_some();
         build_shaderc(&shaderc_dir, has_ninja)
