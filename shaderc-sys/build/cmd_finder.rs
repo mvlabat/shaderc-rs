@@ -27,6 +27,13 @@ impl CommandFinder {
         let path = self.path.clone();
         self.cache.entry(cmd.clone()).or_insert_with(|| {
             for path in env::split_paths(&path) {
+                println!("Dir: {}", path.display());
+                let paths = std::fs::read_dir(&path).unwrap();
+
+                for path in paths {
+                    println!("Name: {}", path.unwrap().path().display());
+                }
+
                 let target = path.join(&cmd);
                 let mut cmd_alt = cmd.clone();
                 cmd_alt.push(".exe");
